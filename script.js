@@ -22,21 +22,31 @@ const trainingData = [];
 
 let latestThumbIndexDistance = null;
 let latestWristIndexDistance = null;
+let latestWristMiddleDistance = null;
 
-// Record one training sample
+
+// ============================================================
+// RECORD ONE TRAINING SAMPLE
+// ============================================================
+
 function recordSample(gesture) {
+  // Do not record if the camera has no valid measurements.
   if (
     latestThumbIndexDistance === null ||
-    latestWristIndexDistance === null
+    latestWristIndexDistance === null ||
+    latestWristMiddleDistance === null
   ) {
     dataStatus.textContent =
-      "No hand measurements yet. Show your hand to the camera.";
+      "No valid hand measurements. Show your hand to the camera.";
+
     return;
   }
 
   const sample = {
     thumb_index_distance: latestThumbIndexDistance,
     wrist_index_distance: latestWristIndexDistance,
+    wrist_middle_distance: latestWristMiddleDistance,
+    hand: handSelect.value,
     gesture_label: gesture
   };
 
@@ -50,7 +60,11 @@ function recordSample(gesture) {
   console.log("All training data:", trainingData);
 }
 
-// Gesture buttons
+
+// ============================================================
+// GESTURE BUTTONS
+// ============================================================
+
 pinchButton.addEventListener("click", () => {
   selectedGesture = "pinch";
   recordSample(selectedGesture);
@@ -66,21 +80,32 @@ palmButton.addEventListener("click", () => {
   recordSample(selectedGesture);
 });
 
+
+// ============================================================
+// DOWNLOAD TRAINING DATA AS CSV
+// ============================================================
+
 downloadButton.addEventListener("click", () => {
   if (trainingData.length === 0) {
-    dataStatus.textContent = "No training data to download yet.";
+    dataStatus.textContent =
+      "No training data to download yet.";
+
     return;
   }
 
   const headers = [
     "thumb_index_distance",
     "wrist_index_distance",
+    "wrist_middle_distance",
+    "hand",
     "gesture_label"
   ];
 
   const rows = trainingData.map(sample => [
     sample.thumb_index_distance,
     sample.wrist_index_distance,
+    sample.wrist_middle_distance,
+    sample.hand,
     sample.gesture_label
   ]);
 
@@ -103,11 +128,17 @@ downloadButton.addEventListener("click", () => {
   link.click();
   document.body.removeChild(link);
 
-  URL.revokeObjectURL(url);
+  // Release the temporary URL after the download has started.
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
 
   dataStatus.textContent =
     `Downloaded ${trainingData.length} training samples.`;
 });
+
+
+// ============================================================
+// START GESTUREPOINT
+// ============================================================
 
 async function startGesturePoint() {
   try {
@@ -120,13 +151,14 @@ async function startGesturePoint() {
 
     webcam.srcObject = stream;
 
-    await new Promise((resolve) => {
+    await new Promise(resolve => {
       webcam.onloadedmetadata = resolve;
     });
 
     await webcam.play();
 
-    statusText.textContent = "Loading hand detection model...";
+    statusText.textContent =
+      "Loading hand detection model...";
 
     const vision = await FilesetResolver.forVisionTasks(
       "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@latest/wasm"
@@ -147,7 +179,12 @@ async function startGesturePoint() {
     canvas.width = webcam.videoWidth;
     canvas.height = webcam.videoHeight;
 
-    statusText.textContent = "Show your hand to the camera";
+    statusText.textContent =
+      "Show your hand to the camera";
+
+    // ========================================================
+    // DETECT HAND AND CALCULATE FEATURES
+    // ========================================================
 
     function detectHand() {
       if (webcam.readyState >= 2) {
@@ -167,11 +204,14 @@ async function startGesturePoint() {
           statusText.textContent = "Hand detected!";
 
           for (const landmarks of results.landmarks) {
-            const indexTip = landmarks[8];
-            const thumbTip = landmarks[4];
+            // MediaPipe hand landmark positions.
             const wrist = landmarks[0];
+            const thumbTip = landmarks[4];
+            const indexTip = landmarks[8];
+            const middleTip = landmarks[12];
 
-            // Feature 1: distance between thumb and index fingertip
+            // Feature 1:
+            // Distance between thumb and index fingertip.
             const fingertipDistance = Math.sqrt(
               (thumbTip.x - indexTip.x) ** 2 +
               (thumbTip.y - indexTip.y) ** 2
@@ -179,7 +219,8 @@ async function startGesturePoint() {
 
             latestThumbIndexDistance = fingertipDistance;
 
-            // Feature 2: distance between wrist and index fingertip
+            // Feature 2:
+            // Distance between wrist and index fingertip.
             const wristToIndexDistance = Math.sqrt(
               (wrist.x - indexTip.x) ** 2 +
               (wrist.y - indexTip.y) ** 2
@@ -187,7 +228,17 @@ async function startGesturePoint() {
 
             latestWristIndexDistance = wristToIndexDistance;
 
-            // Draw hand landmarks
+            // Feature 3:
+            // Distance between wrist and middle fingertip.
+            const wristToMiddleDistance = Math.sqrt(
+              (wrist.x - middleTip.x) ** 2 +
+              (wrist.y - middleTip.y) ** 2
+            );
+
+            latestWristMiddleDistance =
+              wristToMiddleDistance;
+
+            // Draw the detected hand landmarks.
             for (const point of landmarks) {
               canvasContext.beginPath();
 
@@ -204,15 +255,26 @@ async function startGesturePoint() {
             }
           }
         } else {
+          // Reset measurements so an old frame cannot be recorded.
+          latestThumbIndexDistance = null;
+          latestWristIndexDistance = null;
+          latestWristMiddleDistance = null;
+
           statusText.textContent =
             "No hand detected - show your hand";
         }
+      } else {
+        // No usable video frame: measurements are not valid.
+        latestThumbIndexDistance = null;
+        latestWristIndexDistance = null;
+        latestWristMiddleDistance = null;
       }
 
       requestAnimationFrame(detectHand);
     }
 
     detectHand();
+
   } catch (error) {
     console.error("GesturePoint error:", error);
 
