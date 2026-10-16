@@ -4,40 +4,84 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>GesturePoint - Hand Detection</title>
+
+  <title>GesturePoint - Hand Gesture Control</title>
+
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <h1>GesturePoint</h1>
-  <p>Hand detection setup</p>
+  <main class="app-container">
+    <header class="app-header">
+      <h1>GesturePoint</h1>
+      <p>Control your on-screen pointer using hand gestures.</p>
+    </header>
 
-  <div class="camera-container">
-    <video id="webcam" autoplay playsinline></video>
-    <canvas id="output"></canvas>
-  </div>
+    <section class="detector-section" aria-label="Hand detector">
+      <div class="camera-container">
+        <video
+          id="webcam"
+          autoplay
+          playsinline
+          muted
+        ></video>
 
-  <p id="status">Starting camera...</p>
+        <canvas id="output"></canvas>
 
-  
-<div class="data-collection">
-  <h2>Collect Training Data</h2>
-<p>Select the hand and gesture before recording a sample.</p>
+        <div
+          id="handPointer"
+          aria-hidden="true"
+        ></div>
+      </div>
 
-<label for="handSelect">Choose hand:</label>
+      <p id="status" role="status" aria-live="polite">
+        Starting camera...
+      </p>
+    </section>
 
-<select id="handSelect">
-  <option value="right">Right hand</option>
-  <option value="left">Left hand</option>
-</select>
+    <section class="data-collection">
+      <h2>Collect Training Data</h2>
 
-  <button id="pinchButton">Record Pinch</button>
-  <button id="fistButton">Record Fist</button>
-  <button id="palmButton">Record Open Palm</button>
+      <p>
+        Select the hand and hold your chosen gesture
+        before recording a sample.
+      </p>
 
-  <p id="dataStatus">Collected samples: 0</p>
-  <button id="downloadButton">Download Training Data (CSV)</button>
-</div>
+      <div class="form-group">
+        <label for="handSelect">Choose hand:</label>
 
+        <select id="handSelect">
+          <option value="right">Right hand</option>
+          <option value="left">Left hand</option>
+        </select>
+      </div>
+
+      <div class="button-group">
+        <button id="pinchButton" type="button">
+          Record Pinch
+        </button>
+
+        <button id="fistButton" type="button">
+          Record Fist
+        </button>
+
+        <button id="palmButton" type="button">
+          Record Open Palm
+        </button>
+      </div>
+
+      <p id="dataStatus" role="status" aria-live="polite">
+        Collected samples: 0
+      </p>
+
+      <button
+        id="downloadButton"
+        class="download-button"
+        type="button"
+      >
+        Download Training Data (CSV)
+      </button>
+    </section>
+  </main>
 
   <script type="module" src="script.js"></script>
 </body>

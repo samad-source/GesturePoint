@@ -1,4 +1,8 @@
 
+/* =========================================================
+   GLOBAL STYLES
+   ========================================================= */
+
 * {
   box-sizing: border-box;
 }
@@ -12,15 +16,26 @@ body {
   color: #1e293b;
 }
 
-h1 {
+.app-container {
+  width: 100%;
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+.app-header h1 {
   margin-bottom: 8px;
   font-size: 2rem;
 }
 
-p {
-  margin-bottom: 24px;
+.app-header p,
+.data-collection > p {
   color: #64748b;
+  line-height: 1.6;
 }
+
+/* =========================================================
+   CAMERA AND HAND DETECTOR
+   ========================================================= */
 
 .camera-container {
   position: relative;
@@ -31,25 +46,173 @@ p {
   border: 3px solid #cbd5e1;
   border-radius: 12px;
   background-color: #111827;
+  line-height: 0;
 }
 
-video,
-canvas {
+#webcam {
   display: block;
   width: 100%;
   height: auto;
 }
 
-canvas {
+#output {
   position: absolute;
-  top: 0;
-  left: 0;
+  inset: 0;
+  display: block;
   width: 100%;
   height: 100%;
   pointer-events: none;
 }
 
+/* =========================================================
+   ON-SCREEN HAND POINTER
+   ========================================================= */
+
+
+#handPointer {
+  position: fixed;
+  left: 0;
+  top: 0;
+  width: 24px;
+  height: 32px;
+  background-color: #00ff88;
+  border: 2px solid #ffffff;
+  clip-path: polygon(
+    0 0,
+    0 100%,
+    30% 72%,
+    52% 100%,
+    68% 91%,
+    47% 63%,
+    85% 60%
+  );
+  filter: drop-shadow(0 0 3px rgba(0, 0, 0, 0.6));
+  pointer-events: none;
+  z-index: 99999;
+  display: none;
+}
+
+
+/* =========================================================
+   DETECTOR STATUS
+   ========================================================= */
+
 #status {
   margin-top: 16px;
   font-weight: bold;
+  color: #334155;
+  line-height: 1.5;
+}
+
+/* =========================================================
+   TRAINING DATA COLLECTION
+   ========================================================= */
+
+.data-collection {
+  width: 100%;
+  max-width: 640px;
+  margin: 28px auto 0;
+  padding: 24px;
+  background-color: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  box-shadow: 0 4px 14px rgba(15, 23, 42, 0.05);
+}
+
+.data-collection h2 {
+  margin-top: 0;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  margin: 20px 0;
+}
+
+#handSelect {
+  width: 100%;
+  max-width: 240px;
+  padding: 10px 12px;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  background-color: #ffffff;
+  color: #1e293b;
+  font-size: 1rem;
+}
+
+/* =========================================================
+   BUTTONS
+   ========================================================= */
+
+.button-group {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin: 20px 0;
+}
+
+button {
+  padding: 11px 16px;
+  border: none;
+  border-radius: 8px;
+  background-color: #2563eb;
+  color: #ffffff;
+  font-size: 0.95rem;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+button:hover {
+  background-color: #1d4ed8;
+}
+
+button:focus-visible,
+select:focus-visible {
+  outline: 3px solid #93c5fd;
+  outline-offset: 3px;
+}
+
+.download-button {
+  background-color: #0f766e;
+}
+
+.download-button:hover {
+  background-color: #115e59;
+}
+
+#dataStatus {
+  margin: 16px 0;
+  color: #475569;
+  overflow-wrap: anywhere;
+}
+
+/* =========================================================
+   MOBILE RESPONSIVENESS
+   ========================================================= */
+
+@media (max-width: 480px) {
+  body {
+    padding: 20px 12px;
+  }
+
+  .app-header h1 {
+    font-size: 1.7rem;
+  }
+
+  .data-collection {
+    padding: 18px 12px;
+  }
+
+  .button-group {
+    flex-direction: column;
+  }
+
+  .button-group button,
+  .download-button {
+    width: 100%;
+  }
 }
