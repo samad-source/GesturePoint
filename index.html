@@ -18,6 +18,27 @@
 
   <p id="status">Starting camera...</p>
 
+  
+<div class="data-collection">
+  <h2>Collect Training Data</h2>
+<p>Select the hand and gesture before recording a sample.</p>
+
+<label for="handSelect">Choose hand:</label>
+
+<select id="handSelect">
+  <option value="right">Right hand</option>
+  <option value="left">Left hand</option>
+</select>
+
+  <button id="pinchButton">Record Pinch</button>
+  <button id="fistButton">Record Fist</button>
+  <button id="palmButton">Record Open Palm</button>
+
+  <p id="dataStatus">Collected samples: 0</p>
+  <button id="downloadButton">Download Training Data (CSV)</button>
+</div>
+
+
   <script type="module" src="script.js"></script>
 </body>
 </html>
